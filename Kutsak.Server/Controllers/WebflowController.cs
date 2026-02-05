@@ -57,6 +57,8 @@ public class WebflowController : KutsakControllerBase
         
         var form = JsonSerializer.Deserialize<FormSubmission>(submission.Payload)!;
         
+        if (form.Name != "Contact Us") return BadRequest("Not a contact us form");
+        
         Console.WriteLine($"Submission: {submission.TriggerType}");
         Console.WriteLine($"Form: {form.FormId}");
         
