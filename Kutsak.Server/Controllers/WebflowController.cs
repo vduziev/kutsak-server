@@ -42,8 +42,8 @@ public class WebflowController : KutsakControllerBase
         }
     }
     
-    [HttpPost("Test")]
-    public async Task<IActionResult> Get() {
+    [HttpPost("Form")]
+    public async Task<IActionResult> Post() {
         Console.WriteLine($"RECIEVED");
         
         using var reader = new StreamReader(Request.Body);
