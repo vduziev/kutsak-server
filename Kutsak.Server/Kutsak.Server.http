@@ -1,6 +1,0 @@
-@Kutsak.Server_HostAddress = http://localhost:5193
-
-GET {{Kutsak.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

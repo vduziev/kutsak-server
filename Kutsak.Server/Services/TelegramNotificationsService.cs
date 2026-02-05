@@ -15,7 +15,7 @@ public class TelegramNotificationsService
     }
 
     private string GetUrl(string chatId, string message)
-        => $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(message)}";
+        => $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={Uri.EscapeDataString(message)}&parse_mode=HTML";
     
     public async Task NotifyAllAsync(string message) {
         var tasks = new List<Task>();
