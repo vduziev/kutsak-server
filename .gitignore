@@ -490,3 +490,5 @@ $RECYCLE.BIN/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+.run/Development.run.xml
