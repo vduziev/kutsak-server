@@ -4,8 +4,8 @@ namespace Kutsak.Server.Controllers.Base;
 
 public abstract class KutsakControllerBase : ControllerBase
 {
-    public void Verify(string header, string value) {
-        if (Request.Headers[header] != value && Request.Query[header] != value) {
+    public void Verify(string key, string value) {
+        if (Request.Headers[key] != value && Request.Query[key] != value) {
             throw new UnauthorizedAccessException();
         }
     }
