@@ -33,16 +33,12 @@ public class AltegioController : KutsakControllerBase
             case "update":
                 return Ok();
             case "delete":
-                await _meet.DeleteEventByAltegioIdAsync(payload.Data.Id.GetValueOrDefault());
+                await _meet.DeleteEventAsync(payload.Data.Id.GetValueOrDefault());
                 return Ok();
             case "create": {
-                var time = DateTime.Parse(payload.Data.Date, new DateTimeFormatInfo() {
-                    DateSeparator = "-",
-                    TimeSeparator = ":",
-                    FullDateTimePattern = "yyyy-MM-dd HH:mm:ss",
-                });
+                var time = DateTime.Parse(payload.Data.Date, AltegioBookingService.Format);
         
-                var meetLink = await _meet.CreateMeetLinkAsync(payload);
+                var meetingEvent = await _meet.CreateEventAsync(payload);
 
                 await _notifications.NotifyAllAsync(
                     $"""
@@ -54,14 +50,15 @@ public class AltegioController : KutsakControllerBase
                      <b>Телефон:</b> <code>{payload.Data.Client.Phone}</code>
 
                      <b>Дата:</b> {time}
-                     <b>Google Meet:</b> {meetLink}
+                     <b>Google Meet:</b> {meetingEvent.HangoutLink}
+                     <b>Google Calendar:</b> {meetingEvent.HtmlLink}
 
                      <b>Повідомлення:</b> {(string.IsNullOrWhiteSpace(payload.Data.Comment) ? "<i>немає</i>" : "")}
                      {payload.Data.Comment}
                      """
                 );
         
-                return Ok(meetLink);
+                return Ok();
             }
         }
         
