@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
+using Kutsak.Server.Altegio;
 using Kutsak.Server.Controllers.Base;
 using Kutsak.Server.Services;
 using Microsoft.AspNetCore.Mvc;
-using YourApp.Models.Altegio;
 
 namespace Kutsak.Server.Controllers;
 
@@ -11,57 +11,44 @@ namespace Kutsak.Server.Controllers;
 [Route("[controller]")]
 public class AltegioController : KutsakControllerBase
 {
-    private readonly TelegramNotificationsService _notifications;
-    private readonly GoogleMeetService _meet;
+    private readonly AltegioBookingService _booking;
 
-    public AltegioController(TelegramNotificationsService notifications) {
-        _notifications = notifications;
-        _meet = new GoogleMeetService();
+    public AltegioController(IServiceProvider services) {
+        _booking = services.GetRequiredService<AltegioBookingService>();
     }
 
     [HttpPost("Test")]
     public async Task<IActionResult> Post([FromBody] JsonElement body) {
-        //Console.WriteLine(body.GetRawText());
+        Console.WriteLine("- - - body:");
+        Console.WriteLine(body.GetRawText());
+        Console.WriteLine("- - -");
+
+        switch (body.GetProperty("resource").GetString()) {
+            case "record": {
+                Console.WriteLine("Got booking");
+                var booking = JsonSerializer.Deserialize<AltegioBookingBody>(body.GetRawText());
+                if (booking is null) {
+                    Console.WriteLine("Cannot deserialize");
+                    return BadRequest("Cannot deserialize to a webhook payload");
+                }
         
-        var payload = JsonSerializer.Deserialize<AltegioWebhookPayload>(body.GetRawText());
-        if (payload is null) {
-            Console.WriteLine("Cannot deserialize");
-            return BadRequest("Cannot deserialize to a webhook payload");
-        }
-
-        switch (payload.Status) {
-            case "update":
-                return Ok();
-            case "delete":
-                await _meet.DeleteEventAsync(payload.Data.Id.GetValueOrDefault());
-                return Ok();
-            case "create": {
-                var time = DateTime.Parse(payload.Data.Date, AltegioBookingService.Format);
-        
-                var meetingEvent = await _meet.CreateEventAsync(payload);
-
-                await _notifications.NotifyAllAsync(
-                    $"""
-                     <i>{payload.Data.Id} | {payload.Status}</i>
-                     <b>Отримано новий запис!</b>
-
-                     <b>Ім'я:</b> {payload.Data.Client.Name}
-                     <b>Е. Пошта:</b> {payload.Data.Client.Email}
-                     <b>Телефон:</b> <code>{payload.Data.Client.Phone}</code>
-
-                     <b>Дата:</b> {time}
-                     <b>Google Meet:</b> {meetingEvent.HangoutLink}
-                     <b>Google Calendar:</b> {meetingEvent.HtmlLink}
-
-                     <b>Повідомлення:</b> {(string.IsNullOrWhiteSpace(payload.Data.Comment) ? "<i>немає</i>" : "")}
-                     {payload.Data.Comment}
-                     """
-                );
-        
-                return Ok();
+                await _booking.ProcessBookingAsync(booking);
+                break;
+            }
+            case "finances_operation": {
+                Console.WriteLine("Got payment");
+            
+                var payment = JsonSerializer.Deserialize<AltegioTransactionPayload>(body.GetRawText());
+                if (payment is null) {
+                    Console.WriteLine("Cannot deserialize");
+                    return BadRequest("Cannot deserialize to a webhook payload");
+                }
+            
+                await _booking.ConfirmBookingAsync(payment.Data.RecordId.GetValueOrDefault());
+                break;
             }
         }
-        
-        return BadRequest("Unknown status");
+
+        return Ok();
     }
 }

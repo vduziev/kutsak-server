@@ -5,7 +5,7 @@ using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
-using YourApp.Models.Altegio;
+using Kutsak.Server.Altegio;
 
 namespace Kutsak.Server.Services;
 
@@ -42,7 +42,7 @@ public class GoogleMeetService
         });
     }
 
-    public async Task<Event> CreateEventAsync(AltegioWebhookPayload payload) {
+    public async Task<Event> CreateEventAsync(AltegioBookingBody payload) {
         var length = payload.Data.SeanceLength.GetValueOrDefault();
         if (length == 0) {
             throw new Exception("Invalid seance length");

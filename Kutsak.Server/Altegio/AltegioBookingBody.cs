@@ -1,10 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Collections.Generic;
 
-namespace YourApp.Models.Altegio
+namespace Kutsak.Server.Altegio
 {
-    public class AltegioWebhookPayload
+    public class AltegioBookingBody
     {[JsonPropertyName("company_id")]
         public long? CompanyId { get; set; }
 

@@ -15,6 +15,8 @@ public class Program
             Environment.GetEnvironmentVariable("CHATS")?.Split(",") ?? [],
             services
         ));
+        builder.Services.AddSingleton<GoogleMeetService>();
+        builder.Services.AddSingleton<AltegioBookingService>();
 
         if (builder.Environment.IsDevelopment()) {
             builder.WebHost.UseUrls("http://*:31303");
